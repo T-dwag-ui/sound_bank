@@ -1,0 +1,238 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
+
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'package:whatchord_app/features/demo/demo.dart';
+import 'package:whatchord_app/features/lookup/lookup.dart';
+
+import 'sounding_note_numbers_providers.dart';
+
+@immutable
+class InputIdleState {
+  const InputIdleState({
+    required this.cooldown,
+    required this.hasSeenEngagement,
+    required this.isEngagedNow,
+    required this.lastReleaseAt,
+    required this.isEligible,
+  });
+
+  final Duration cooldown;
+
+  /// True once engagement (notes) has been observed at least once.
+  final bool hasSeenEngagement;
+
+  /// True while user currently has any keys down (or pedal down if included).
+  final bool isEngagedNow;
+
+  /// Timestamp of the most recent "fully released" moment (notes empty + pedal up).
+  /// Null until a full release after activity has been observed.
+  final DateTime? lastReleaseAt;
+
+  /// Convenience: whether idle UI is eligible to show.
+  /// - True on first load (before any activity).
+  /// - False while engaged.
+  /// - True only after the cooldown since [lastReleaseAt].
+  final bool isEligible;
+
+  InputIdleState copyWith({
+    Duration? cooldown,
+    bool? hasSeenEngagement,
+    bool? isEngagedNow,
+    DateTime? lastReleaseAt,
+    bool? isEligible,
+  }) {
+    return InputIdleState(
+      cooldown: cooldown ?? this.cooldown,
+      hasSeenEngagement: hasSeenEngagement ?? this.hasSeenEngagement,
+      isEngagedNow: isEngagedNow ?? this.isEngagedNow,
+      lastReleaseAt: lastReleaseAt ?? this.lastReleaseAt,
+      isEligible: isEligible ?? this.isEligible,
+    );
+  }
+}
+
+/// Quiet time after the last full release before idle UI may show.
+final inputIdleCooldownProvider = Provider<Duration>((ref) {
+  return const Duration(seconds: 8);
+});
+
+final inputIdleProvider = NotifierProvider<InputIdleNotifier, InputIdleState>(
+  InputIdleNotifier.new,
+);
+
+/// The [InputIdleState.isEligible] flag alone, for boolean-only consumers.
+final inputIdleEligibleProvider = Provider<bool>((ref) {
+  return ref.watch(inputIdleProvider).isEligible;
+});
+
+class InputIdleNotifier extends Notifier<InputIdleState> {
+  Timer? _timer;
+
+  @override
+  InputIdleState build() {
+    final cooldown = ref.watch(inputIdleCooldownProvider);
+
+    ref.onDispose(() {
+      _timer?.cancel();
+      _timer = null;
+    });
+
+    ref.listen<Duration>(inputIdleCooldownProvider, (prev, next) {
+      state = state.copyWith(cooldown: next);
+      _scheduleFromRelease();
+    });
+
+    final initial = InputIdleState(
+      cooldown: cooldown,
+      hasSeenEngagement: false,
+      isEngagedNow: false,
+      lastReleaseAt: null,
+      isEligible: true,
+    );
+
+    state = initial;
+
+    // When demo mode toggles, force idle immediately rather than waiting for
+    // an existing MIDI cooldown to expire before showing the glyph.
+    ref.listen<bool>(demoModeProvider, (prev, next) {
+      if ((prev == false && next == true) || (prev == true && next == false)) {
+        markIdleNow();
+      }
+    });
+
+    // Reset idle immediately when lookup mode toggles, and whenever the lookup
+    // selection empties (clear or the last undo), so the input line and toggle
+    // reappear without waiting out the cooldown.
+    ref.listen<({bool active, int noteCount})>(
+      lookupModeProvider.select(
+        (s) => (active: s.active, noteCount: s.pitchClasses.length),
+      ),
+      (prev, next) {
+        final activeChanged = prev?.active != next.active;
+        final clearedWhileActive = next.active && next.noteCount == 0;
+        if (activeChanged || clearedWhileActive) markIdleNow();
+      },
+    );
+
+    // Keep idle visuals deterministic whenever a new demo step is loaded,
+    // including empty intro/outro steps that should show the idle glyph
+    // immediately.
+    ref.listen<DemoStep>(demoCurrentStepProvider, (prev, next) {
+      if (!ref.read(demoModeProvider)) return;
+      markIdleNow();
+    });
+
+    // Engagement is defined strictly by whether any notes are sounding.
+    // Sustain pedal state (touch or MIDI) must not directly affect engagement.
+    ref.listen<int>(
+      soundingNoteNumbersProvider.select((s) => s.length),
+      (prev, next) => _updateEngagement(engagedNow: next > 0),
+      fireImmediately: true,
+    );
+
+    return initial;
+  }
+
+  /// Marks input as idle and immediately eligible.
+  ///
+  /// Useful when exiting demo / onboarding flows that inject notes through
+  /// real plumbing and should not wait out the idle cooldown.
+  void markIdleNow() {
+    _timer?.cancel();
+    _timer = null;
+
+    final now = DateTime.now();
+
+    state = state.copyWith(
+      hasSeenEngagement: true,
+      isEngagedNow: false,
+      // Backdate the release so cooldown is already satisfied.
+      lastReleaseAt: now.subtract(state.cooldown),
+      isEligible: true,
+    );
+  }
+
+  void _updateEngagement({required bool engagedNow}) {
+    final wasEngaged = state.isEngagedNow;
+
+    // If state didn't actually change, do nothing.
+    if (wasEngaged == engagedNow) return;
+
+    // Transition: idle/released -> engaged.
+    if (engagedNow) {
+      _timer?.cancel();
+      _timer = null;
+
+      state = state.copyWith(
+        hasSeenEngagement: true,
+        isEngagedNow: true,
+        // Not eligible while engaged.
+        isEligible: false,
+      );
+      return;
+    }
+
+    // Transition: engaged -> fully released.
+    final releaseAt = DateTime.now();
+
+    state = state.copyWith(
+      hasSeenEngagement: true,
+      isEngagedNow: false,
+      lastReleaseAt: releaseAt,
+      // Not eligible until cooldown elapses.
+      isEligible: false,
+    );
+
+    _scheduleFromRelease();
+  }
+
+  void _scheduleFromRelease() {
+    _timer?.cancel();
+    _timer = null;
+
+    // With no activity observed yet, stay eligible.
+    if (!state.hasSeenEngagement) {
+      state = state.copyWith(isEligible: true);
+      return;
+    }
+
+    // If engaged now, never eligible.
+    if (state.isEngagedNow) {
+      state = state.copyWith(isEligible: false);
+      return;
+    }
+
+    final releaseAt = state.lastReleaseAt;
+    if (releaseAt == null) {
+      // Activity observed but no release recorded yet; be conservative.
+      state = state.copyWith(isEligible: false);
+      return;
+    }
+
+    final now = DateTime.now();
+    final remaining = state.cooldown - now.difference(releaseAt);
+
+    if (remaining <= Duration.zero) {
+      state = state.copyWith(isEligible: true);
+      return;
+    }
+
+    _timer = Timer(remaining, () {
+      // Only flip eligible if still not engaged and the release timestamp is
+      // unchanged (no re-engagement since scheduling).
+      final currentReleaseAt = state.lastReleaseAt;
+      if (state.isEngagedNow) return;
+      if (currentReleaseAt == null) return;
+
+      final quietFor = DateTime.now().difference(currentReleaseAt);
+      if (quietFor >= state.cooldown) {
+        state = state.copyWith(isEligible: true);
+      } else {
+        _scheduleFromRelease();
+      }
+    });
+  }
+}

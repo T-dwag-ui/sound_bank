@@ -1,0 +1,451 @@
+krumhansl1990:
+  type: book
+  title: Cognitive Foundations of Musical Pitch
+  author: Krumhansl, Carol L.
+  date: 1990
+  publisher: Oxford University Press
+
+temperley1999:
+  type: article
+  title: "What's Key for Key? The Krumhansl-Schmuckler Key-Finding Algorithm Reconsidered"
+  author: Temperley, David
+  date: 1999
+  parent:
+    type: periodical
+    title: Music Perception
+    volume: 17
+    issue: 1
+  page-range: 65-100
+  serial-number:
+    doi: 10.2307/40285812
+
+albrecht2013:
+  type: article
+  title: "The Use of Large Corpora to Train a New Type of Key-Finding Algorithm: An Improved Treatment of the Minor Mode"
+  author:
+    - Albrecht, Joshua
+    - Shanahan, Daniel
+  date: 2013
+  parent:
+    type: periodical
+    title: Music Perception
+    volume: 31
+    issue: 1
+  page-range: 59-67
+  serial-number:
+    doi: 10.1525/mp.2013.31.1.59
+
+temperley2007:
+  type: book
+  title: Music and Probability
+  author: Temperley, David
+  date: 2007
+  publisher: MIT Press
+  serial-number:
+    doi: 10.7551/mitpress/4807.001.0001
+
+raphael2004:
+  type: article
+  title: Functional Harmonic Analysis Using Probabilistic Models
+  author:
+    - Raphael, Christopher
+    - Stoddard, Joshua
+  date: 2004
+  parent:
+    type: periodical
+    title: Computer Music Journal
+    volume: 28
+    issue: 3
+  page-range: 45-52
+  serial-number:
+    doi: 10.1162/0148926041790676
+
+napoles2019:
+  type: article
+  title: Key-Finding Based on a Hidden Markov Model and Key Profiles
+  author:
+    - Nápoles López, Néstor
+    - Arthur, Claire
+    - Fujinaga, Ichiro
+  date: 2019
+  parent:
+    type: proceedings
+    title: Proceedings of the 6th International Conference on Digital Libraries for Musicology (DLfM)
+  page-range: 33-37
+  serial-number:
+    doi: 10.1145/3358664.3358675
+
+aarden2003:
+  type: thesis
+  title: Dynamic Melodic Expectancy
+  author: Aarden, Bret J.
+  date: 2003
+  publisher: The Ohio State University
+  url: http://rave.ohiolink.edu/etdc/view?acc_num=osu1060969388
+
+music21:
+  type: article
+  title: "music21: A Toolkit for Computer-Aided Musicology and Symbolic Music Data"
+  author:
+    - Cuthbert, Michael Scott
+    - Ariza, Christopher
+  date: 2010
+  parent:
+    type: proceedings
+    title: Proceedings of the 11th International Society for Music Information Retrieval Conference (ISMIR)
+  page-range: 637-642
+  serial-number:
+    doi: 10.5281/zenodo.1416114
+
+chew2000:
+  type: thesis
+  title: Towards a Mathematical Model of Tonality
+  author: Chew, Elaine
+  date: 2000
+  publisher: Massachusetts Institute of Technology
+  url: https://dspace.mit.edu/handle/1721.1/9139
+
+micchi2020:
+  type: article
+  title: "Not All Roads Lead to Rome: Pitch Representation and Model Architecture for Automatic Harmonic Analysis"
+  author:
+    - Micchi, Gianluca
+    - Gotham, Mark
+    - Giraud, Mathieu
+  date: 2020
+  parent:
+    type: periodical
+    title: Transactions of the International Society for Music Information Retrieval
+    volume: 3
+    issue: 1
+  page-range: 42-54
+  serial-number:
+    doi: 10.5334/tismir.45
+
+napoles2021:
+  type: article
+  title: "AugmentedNet: A Roman Numeral Analysis Network with Synthetic Training Examples and Additional Tonal Tasks"
+  author:
+    - Nápoles López, Néstor
+    - Gotham, Mark
+    - Fujinaga, Ichiro
+  date: 2021
+  parent:
+    type: proceedings
+    title: Proceedings of the 22nd International Society for Music Information Retrieval Conference (ISMIR)
+  page-range: 404-411
+  serial-number:
+    doi: 10.5281/zenodo.5624533
+  url: https://archives.ismir.net/ismir2021/paper/000050.pdf
+
+tymo2019:
+  type: article
+  title: "The RomanText Format: A Flexible and Standard Method for Representing Roman Numeral Analyses"
+  author:
+    - Tymoczko, Dmitri
+    - Gotham, Mark
+    - Cuthbert, Michael Scott
+    - Ariza, Christopher
+  date: 2019
+  parent:
+    type: proceedings
+    title: Proceedings of the 20th International Society for Music Information Retrieval Conference (ISMIR)
+  page-range: 123-129
+  serial-number:
+    doi: 10.5281/zenodo.3527756
+  url: https://archives.ismir.net/ismir2019/paper/000012.pdf
+
+elyaniv2010:
+  type: article
+  title: On the Foundations of Noise-Free Selective Classification
+  author:
+    - El-Yaniv, Ran
+    - Wiener, Yair
+  date: 2010
+  parent:
+    type: periodical
+    title: Journal of Machine Learning Research
+    volume: 11
+  page-range: 1605-1641
+  url: https://jmlr.org/papers/v11/el-yaniv10a.html
+
+guo2017:
+  type: article
+  title: On Calibration of Modern Neural Networks
+  author:
+    - Guo, Chuan
+    - Pleiss, Geoff
+    - Sun, Yu
+    - Weinberger, Kilian Q.
+  date: 2017
+  parent:
+    type: proceedings
+    title: Proceedings of the 34th International Conference on Machine Learning (ICML)
+  page-range: 1321-1330
+  url: https://proceedings.mlr.press/v70/guo17a.html
+
+adams2007:
+  type: article
+  title: Bayesian Online Changepoint Detection
+  author:
+    - Adams, Ryan P.
+    - MacKay, David J. C.
+  date: 2007
+  serial-number:
+    arxiv: "0710.3742"
+  url: https://arxiv.org/abs/0710.3742
+
+tsaknaki2025:
+  type: article
+  title: Bayesian Autoregressive Online Change-Point Detection with Time-Varying Parameters
+  author:
+    - Tsaknaki, Ioanna-Yvonni
+    - Lillo, Fabrizio
+    - Mazzarisi, Piero
+  date: 2025
+  parent:
+    type: periodical
+    title: Communications in Nonlinear Science and Numerical Simulation
+    volume: 142
+  page-range: 108500
+  serial-number:
+    doi: 10.1016/j.cnsns.2024.108500
+    arxiv: "2407.16376"
+
+mirex:
+  type: web
+  title: "MIREX Audio Key Detection Task: Evaluation Procedures"
+  organization: Music Information Retrieval Evaluation eXchange
+  url: https://music-ir.org/mirex/wiki/2019:Audio_Key_Detection
+
+wheninrome:
+  type: article
+  title: "When in Rome: A Meta-Corpus of Functional Harmonic Analysis"
+  author:
+    - Gotham, Mark
+    - Micchi, Gianluca
+    - Nápoles López, Néstor
+    - Sailor, Malcolm
+  date: 2023
+  parent:
+    type: periodical
+    title: Transactions of the International Society for Music Information Retrieval
+    volume: 6
+    issue: 1
+  page-range: 150-166
+  serial-number:
+    doi: 10.5334/tismir.165
+  url: https://github.com/MarkGotham/When-in-Rome
+
+asap2020:
+  type: article
+  title: "ASAP: A Dataset of Aligned Scores and Performances for Piano Transcription"
+  author:
+    - Foscarin, Francesco
+    - McLeod, Andrew
+    - Rigaux, Philippe
+    - Jacquemard, Florent
+    - Sakai, Masahiko
+  date: 2020
+  parent:
+    type: proceedings
+    title: Proceedings of the 21st International Society for Music Information Retrieval Conference (ISMIR)
+  page-range: 534-541
+  serial-number:
+    doi: 10.5281/zenodo.4245490
+  url: https://archives.ismir.net/ismir2020/paper/000127.pdf
+
+choco2023:
+  type: article
+  title: "ChoCo: A Chord Corpus and a Data Transformation Workflow for Musical Harmony Knowledge Graphs"
+  author:
+    - de Berardinis, Jacopo
+    - Meroño-Peñuela, Albert
+    - Poltronieri, Andrea
+    - Presutti, Valentina
+  date: 2023
+  parent:
+    type: periodical
+    title: Scientific Data
+    volume: 10
+  page-range: 641
+  serial-number:
+    doi: 10.1038/s41597-023-02410-w
+
+isophonics2009:
+  type: article
+  title: "OMRAS2 Metadata Project 2009"
+  author:
+    - Mauch, Matthias
+    - Cannam, Chris
+    - Davies, Matthew
+    - Dixon, Simon
+    - Harte, Christopher
+    - Kolozali, Sefki
+    - Tidhar, Dan
+    - Sandler, Mark
+  date: 2009
+  parent:
+    type: proceedings
+    title: Late-Breaking Session, 10th International Society for Music Information Retrieval Conference (ISMIR)
+  url: https://ismir2009.ismir.net/proceedings/LBD-18.pdf
+
+weber1846:
+  type: book
+  title: "Theory of Musical Composition: Treated with a View to a Naturally Consecutive Arrangement of Topics"
+  author: Weber, Gottfried
+  editor: Warner, James Franklin
+  date: 1846
+  publisher: O. Ditson & Company
+  url: https://books.google.com/books?id=AOosAAAAYAAJ
+
+moreno2003:
+  type: article
+  title: "Subjectivity, Interpretation, and Irony in Gottfried Weber's Analysis of Mozart's 'Dissonance' Quartet"
+  author: Moreno, Jairo
+  date: 2003
+  parent:
+    type: periodical
+    title: Music Theory Spectrum
+    volume: 25
+    issue: 1
+  page-range: 99-120
+  serial-number:
+    doi: 10.1525/mts.2003.25.1.99
+
+rowe2000:
+  type: article
+  title: Key Induction in the Context of Interactive Performance
+  author: Rowe, Robert
+  date: 2000
+  parent:
+    type: periodical
+    title: Music Perception
+    volume: 17
+    issue: 4
+  page-range: 511-530
+  serial-number:
+    doi: 10.2307/40285831
+
+toiviainen2003:
+  type: article
+  title: "Measuring and Modeling Real-Time Responses to Music: The Dynamics of Tonality Induction"
+  author:
+    - Toiviainen, Petri
+    - Krumhansl, Carol L.
+  date: 2003
+  parent:
+    type: periodical
+    title: Perception
+    volume: 32
+    issue: 6
+  page-range: 741-766
+  serial-number:
+    doi: 10.1068/p3312
+
+chuan2005:
+  type: article
+  title: Polyphonic Audio Key Finding Using the Spiral Array CEG Algorithm
+  author:
+    - Chuan, Ching-Hua
+    - Chew, Elaine
+  date: 2005
+  parent:
+    type: proceedings
+    title: IEEE International Conference on Multimedia and Expo
+  page-range: 21-24
+  serial-number:
+    doi: 10.1109/ICME.2005.1521350
+
+mizener2022:
+  type: article
+  title: Real-Time Modulation Perception in Western Classical Music
+  author:
+    - Mizener, Brendon J.
+    - Dowling, W. Jay
+  date: 2022
+  parent:
+    type: periodical
+    title: Music Perception
+    volume: 39
+    issue: 5
+  page-range: 484-502
+  serial-number:
+    doi: 10.1525/mp.2022.39.5.484
+
+weiss2020:
+  type: article
+  title: "Local Key Estimation in Music Recordings: A Case Study Across Songs, Versions, and Annotators"
+  author:
+    - Weiß, Christof
+    - Schreiber, Hendrik
+    - Müller, Meinard
+  date: 2020
+  parent:
+    type: periodical
+    title: IEEE/ACM Transactions on Audio, Speech, and Language Processing
+    volume: 28
+  page-range: 2919-2932
+  serial-number:
+    doi: 10.1109/TASLP.2020.3030485
+
+napoles2020:
+  type: article
+  title: "On Local Keys, Modulations, and Tonicizations: A Dataset and Methodology for Evaluating Changes of Key"
+  author:
+    - Nápoles López, Néstor
+    - Feisthauer, Laurent
+    - Levé, Florence
+    - Fujinaga, Ichiro
+  date: 2020
+  parent:
+    type: proceedings
+    title: Proceedings of the 7th International Conference on Digital Libraries for Musicology (DLfM)
+  page-range: 18-26
+  serial-number:
+    doi: 10.1145/3424911.3425515
+
+shea2025:
+  type: article
+  title: Metric Accent Affects Perception of Key Center in Pop-Music Chord Loops
+  author:
+    - Shea, Nicholas J.
+    - White, Christopher W. M.
+    - Hughes, Bryn
+    - Vuvan, Dominique T.
+  date: 2025
+  parent:
+    type: periodical
+    title: Music Perception
+    volume: 42
+    issue: 5
+  page-range: 467-480
+  serial-number:
+    doi: 10.1525/mp.2025.2321624
+
+richards2017:
+  type: article
+  title: Tonal Ambiguity in Popular Music's Axis Progressions
+  author: Richards, Mark
+  date: 2017
+  parent:
+    type: periodical
+    title: Music Theory Online
+    volume: 23
+    issue: 3
+  serial-number:
+    doi: 10.30535/mto.23.3.6
+  url: https://www.mtosmt.org/issues/mto.17.23.3/mto.17.23.3.richards.php
+
+declercq2021:
+  type: article
+  title: The Logic of Six-Based Minor
+  author: de Clercq, Trevor
+  date: 2021
+  parent:
+    type: periodical
+    title: Music Theory Online
+    volume: 27
+    issue: 4
+  serial-number:
+    doi: 10.30535/mto.27.4.4

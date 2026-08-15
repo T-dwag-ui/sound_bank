@@ -1,0 +1,14 @@
+name = "whatchord-earthmanmuons-com"
+compatibility_date = "2026-05-16"
+main = "worker/index.js"
+
+[assets]
+directory = "dist"
+binding = "ASSETS"
+not_found_handling = "404-page"
+# Keep .html asset paths available for the Worker and for the rest of the site.
+# The public root and extensionless /try routes are handled explicitly below.
+html_handling = "none"
+# The root needs explicit index.html routing; the Try page needs server-side
+# logic for dynamic social-preview metadata.
+run_worker_first = ["/", "/try"]

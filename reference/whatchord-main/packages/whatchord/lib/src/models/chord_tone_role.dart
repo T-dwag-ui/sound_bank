@@ -1,0 +1,110 @@
+/// A chord-tone role describes the *intended letter context* for a pitch
+/// inside a chord: e.g. "#11" (letter = 4th above root) vs "b5"
+/// (letter = 5th above root), even when both map to the same pitch class.
+enum ChordToneRole {
+  root,
+
+  // 2nd-degree family
+  sus2,
+  flat9,
+  nine,
+  sharp9,
+  add9,
+  addSharp9,
+
+  // 3rd-degree family
+  minor3,
+  splitMinor3,
+  major3,
+
+  // 4th-degree family
+  sus4,
+  eleven,
+  sharp11,
+  add11,
+
+  // 5th-degree family
+  flat5,
+  perfect5,
+  sharp5,
+
+  // 6th-degree family
+  sixth,
+  flat13,
+  thirteen,
+  add13,
+
+  // 7th-degree family
+  dim7, // "bb7" (diminished seventh) as in fully diminished 7th chords
+  flat7,
+  major7,
+}
+
+/// Chord-stack ordering for [ChordToneRole].
+extension ChordToneRoleDegreeOrder on ChordToneRole {
+  /// Position in the conventional chord stack (1, 2, 3, 5, 7, 9, 11, 13).
+  int get degreeOrder => switch (this) {
+    ChordToneRole.root => 1,
+    ChordToneRole.sus2 => 2,
+    ChordToneRole.minor3 ||
+    ChordToneRole.splitMinor3 ||
+    ChordToneRole.major3 => 3,
+    ChordToneRole.sus4 => 4,
+    ChordToneRole.flat5 || ChordToneRole.perfect5 || ChordToneRole.sharp5 => 5,
+    ChordToneRole.sixth => 6,
+    ChordToneRole.dim7 || ChordToneRole.flat7 || ChordToneRole.major7 => 7,
+    ChordToneRole.flat9 ||
+    ChordToneRole.nine ||
+    ChordToneRole.sharp9 ||
+    ChordToneRole.add9 ||
+    ChordToneRole.addSharp9 => 9,
+    ChordToneRole.eleven || ChordToneRole.sharp11 || ChordToneRole.add11 => 11,
+    ChordToneRole.flat13 || ChordToneRole.thirteen || ChordToneRole.add13 => 13,
+  };
+}
+
+/// Letter selection for [ChordToneRole].
+extension ChordToneRoleDegree on ChordToneRole {
+  /// Diatonic scale degree above the chord root (1..7) used to select the letter.
+  int get degreeFromRoot {
+    switch (this) {
+      case ChordToneRole.root:
+        return 1;
+
+      case ChordToneRole.sus2:
+      case ChordToneRole.flat9:
+      case ChordToneRole.nine:
+      case ChordToneRole.sharp9:
+      case ChordToneRole.add9:
+      case ChordToneRole.addSharp9:
+        return 2;
+
+      case ChordToneRole.minor3:
+      case ChordToneRole.splitMinor3:
+      case ChordToneRole.major3:
+        return 3;
+
+      case ChordToneRole.sus4:
+      case ChordToneRole.eleven:
+      case ChordToneRole.sharp11:
+      case ChordToneRole.add11:
+        return 4;
+
+      case ChordToneRole.flat5:
+      case ChordToneRole.perfect5:
+      case ChordToneRole.sharp5:
+        return 5;
+
+      case ChordToneRole.sixth:
+      case ChordToneRole.flat13:
+      case ChordToneRole.thirteen:
+      case ChordToneRole.add13:
+        return 6;
+
+      case ChordToneRole.dim7:
+      case ChordToneRole.flat7:
+      case ChordToneRole.major7:
+        return 7;
+    }
+  }
+}

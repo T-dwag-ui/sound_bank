@@ -1,0 +1,325 @@
+{
+ "counts": {
+  "development": {
+   "events": 6301,
+   "movements": 23
+  },
+  "test": {
+   "events": 3309,
+   "movements": 12
+  }
+ },
+ "frozenAt": "2026-07-28",
+ "gateExcluded": [
+  {
+   "events": 785,
+   "id": "asap-wir-nc-v2/31-3_4",
+   "reason": "final-third drift beyond piecewise-constant offsets (0.62 at shift 0, healthy band starts at 0.70)",
+   "sha256": "17f855e0cfc1badd01df4c2df0fc6fa6ba145d78f8fb8e327fe9cf35522b5273",
+   "sonata": 31,
+   "title": "Beethoven/Piano_Sonatas/31-3_4/ADIG05M"
+  }
+ ],
+ "method": {
+  "gate": "wir_alignment_probe.py shift response must peak sharply at zero (performed-input logs 2026-07-27-02 and -04).",
+  "seed": "performed-input-asap-wir-nc-v2-split-2026-07-27",
+  "selection": "All 32 sonata numbers ranked by SHA-256 of seed plus sonata; the top testRatio share is held out. Movements inherit their sonata's side, including any movement that later passes the alignment gate.",
+  "testRatio": 0.3
+ },
+ "protocol": "research/performed-input/PROTOCOL.md",
+ "schema": "performed-input-split/1",
+ "set": "asap-wir-nc-v2",
+ "sonataSides": {
+  "1": "development",
+  "10": "test",
+  "11": "development",
+  "12": "test",
+  "13": "development",
+  "14": "test",
+  "15": "test",
+  "16": "development",
+  "17": "development",
+  "18": "development",
+  "19": "development",
+  "2": "development",
+  "20": "development",
+  "21": "test",
+  "22": "development",
+  "23": "development",
+  "24": "test",
+  "25": "test",
+  "26": "test",
+  "27": "test",
+  "28": "development",
+  "29": "development",
+  "3": "development",
+  "30": "development",
+  "31": "development",
+  "32": "development",
+  "4": "development",
+  "5": "development",
+  "6": "development",
+  "7": "development",
+  "8": "test",
+  "9": "development"
+ },
+ "source": {
+  "asapCommit": "afc815c75c42e83a79c03feb6da8a35e77d4c6b8",
+  "benchCommit": "b9e011c8cf34c5e76691dcf2c835b8c99ebd9d59",
+  "fixtureContentHash": "2aa0124724edcccb3157d745ec0473234ebe988c98131da2cbad5f22bbbbec2e",
+  "fixtureManifest": "build/whatkey-fixtures/asap-wir-nc-v2/manifest.json",
+  "license": "NONCOMMERCIAL-GATED: ASAP is CC BY-NC-SA 4.0 and the When in Rome Beethoven-sonata analyses are outside the verified group set; local uncommitted experiments only",
+  "type": "asap+when-in-rome"
+ },
+ "splits": {
+  "development": [
+   {
+    "events": 33,
+    "id": "asap-wir-nc-v2/1-1",
+    "sha256": "3ad83e79d64242445478e0255d944571f71c0076a09746f3a71f2d19447b9c5b",
+    "sonata": 1,
+    "title": "Beethoven/Piano_Sonatas/1-1/KimG01"
+   },
+   {
+    "events": 300,
+    "id": "asap-wir-nc-v2/11-1",
+    "sha256": "406dbf99f0a413ec7fe386a8361a0f338ce56547c341053fbd75c040e885e0ca",
+    "sonata": 11,
+    "title": "Beethoven/Piano_Sonatas/11-1/Arciglione03"
+   },
+   {
+    "events": 186,
+    "id": "asap-wir-nc-v2/13-4",
+    "sha256": "531c4e125bffa43c33d971c8f50ad52cc1feabb38acaca64e07e535a26addd71",
+    "sonata": 13,
+    "title": "Beethoven/Piano_Sonatas/13-4/Taverna01"
+   },
+   {
+    "events": 108,
+    "id": "asap-wir-nc-v2/16-1",
+    "sha256": "2b99a235f0c3106c6c04796a97290419fffeeb53df4cb0cfa20d1f53c55aafd0",
+    "sonata": 16,
+    "title": "Beethoven/Piano_Sonatas/16-1/BuiJL02M"
+   },
+   {
+    "events": 684,
+    "id": "asap-wir-nc-v2/16-2",
+    "sha256": "456c04b553f366ddd7162c42297a9deea137236dce9732718c9bfccc2abf4d52",
+    "sonata": 16,
+    "title": "Beethoven/Piano_Sonatas/16-2/LuoJ04M"
+   },
+   {
+    "events": 135,
+    "id": "asap-wir-nc-v2/18-1",
+    "sha256": "1d8a845ebf5cbb1b07ae2764358dd3214d0f278f0990554553dfe7e5773a0dca",
+    "sonata": 18,
+    "title": "Beethoven/Piano_Sonatas/18-1/Avdeeva01"
+   },
+   {
+    "events": 179,
+    "id": "asap-wir-nc-v2/2-1",
+    "sha256": "d017df3cd16676aad8f5b37ce0f43314dbfeee0cba7e66913172d23c446e44cd",
+    "sonata": 2,
+    "title": "Beethoven/Piano_Sonatas/2-1/Kochetkova01"
+   },
+   {
+    "events": 218,
+    "id": "asap-wir-nc-v2/22-1",
+    "sha256": "2746376b149f9414a08ae20995bd4597d538dddd2f7a460970051ea799b03470",
+    "sonata": 22,
+    "title": "Beethoven/Piano_Sonatas/22-1/IVLEVA01"
+   },
+   {
+    "events": 532,
+    "id": "asap-wir-nc-v2/23-1",
+    "sha256": "28fc0f20ad4556ca1134abc15d1498a24e7d7a2a98a05709b44e04c0c729da3c",
+    "sonata": 23,
+    "title": "Beethoven/Piano_Sonatas/23-1/Cai01"
+   },
+   {
+    "events": 291,
+    "id": "asap-wir-nc-v2/28-1",
+    "sha256": "38490675471bb856e21f068c3c46b5a6f9a34d6a2d5006a9d95527532784f320",
+    "sonata": 28,
+    "title": "Beethoven/Piano_Sonatas/28-1/Atzinger01"
+   },
+   {
+    "events": 276,
+    "id": "asap-wir-nc-v2/3-1",
+    "sha256": "16d4698f1b728c05988a80f51b430a436ec22e157469d88d1e8c4946319030d7",
+    "sonata": 3,
+    "title": "Beethoven/Piano_Sonatas/3-1/Bult-ItoS03M"
+   },
+   {
+    "events": 511,
+    "id": "asap-wir-nc-v2/3-2",
+    "sha256": "7f82cedd0f2eeb6473431186f905658711b9ae71d5f02ea929ecea098707532c",
+    "sonata": 3,
+    "title": "Beethoven/Piano_Sonatas/3-2/MiyashitaM04M"
+   },
+   {
+    "events": 266,
+    "id": "asap-wir-nc-v2/30-1",
+    "sha256": "0a9c51bb2d90286bc6f4d112e902de681a270c05d9e9b1d82f3d0f893b38384a",
+    "sonata": 30,
+    "title": "Beethoven/Piano_Sonatas/30-1/CHEN02"
+   },
+   {
+    "events": 490,
+    "id": "asap-wir-nc-v2/31-1",
+    "sha256": "e75995aa02ed8f21d7c2b71f6719532be5f84efb7c1764925d39bd0791b47943",
+    "sonata": 31,
+    "title": "Beethoven/Piano_Sonatas/31-1/ADIG05M"
+   },
+   {
+    "events": 295,
+    "id": "asap-wir-nc-v2/4-1",
+    "sha256": "a8bfac71ccec33c06c8c551bf27a86e9bb6161b13f70402d9766fb2a3c5835ff",
+    "sonata": 4,
+    "title": "Beethoven/Piano_Sonatas/4-1/BENABD01"
+   },
+   {
+    "events": 302,
+    "id": "asap-wir-nc-v2/5-1",
+    "sha256": "fe79cbd9cad76709ccc46e53ba8fda9e31467d0da19f642abb8bd781c94f3c6d",
+    "sonata": 5,
+    "title": "Beethoven/Piano_Sonatas/5-1/Colafelice02M"
+   },
+   {
+    "events": 185,
+    "id": "asap-wir-nc-v2/7-1",
+    "sha256": "4853e39cf8ed633a268e91dfaadb468dc0a3cd8ba506cc7c20fe44e7526735ab",
+    "sonata": 7,
+    "title": "Beethoven/Piano_Sonatas/7-1/Hebert01M"
+   },
+   {
+    "events": 490,
+    "id": "asap-wir-nc-v2/7-2",
+    "sha256": "ec275b3488fc51e9c254e195c327033f9952ad93fb9f42979cd32c85069f5363",
+    "sonata": 7,
+    "title": "Beethoven/Piano_Sonatas/7-2/Larionova04"
+   },
+   {
+    "events": 166,
+    "id": "asap-wir-nc-v2/7-3",
+    "sha256": "0e88afb5f0a1a409522fc48b8547604fc0654b2a508d16088890ee20af0b7c13",
+    "sonata": 7,
+    "title": "Beethoven/Piano_Sonatas/7-3/Larionova04"
+   },
+   {
+    "events": 143,
+    "id": "asap-wir-nc-v2/7-4",
+    "sha256": "54bd2b0de8ee91740dd55e186c3aa40088661b3cd482d84b14fdd4a807cd7289",
+    "sonata": 7,
+    "title": "Beethoven/Piano_Sonatas/7-4/Larionova04M"
+   },
+   {
+    "events": 274,
+    "id": "asap-wir-nc-v2/9-1",
+    "sha256": "2dd8f3344901db8676c0b1e4614cc2e63f6299b6ebe1d144b3c47ce3ae2b629a",
+    "sonata": 9,
+    "title": "Beethoven/Piano_Sonatas/9-1/Tysman05M"
+   },
+   {
+    "events": 121,
+    "id": "asap-wir-nc-v2/9-2_no_trio",
+    "sha256": "f854a475c0787c662a291f619b83c5cde5aa3d4760cca3a4b1865dd679c36404",
+    "sonata": 9,
+    "title": "Beethoven/Piano_Sonatas/9-2_no_trio/Tysman05"
+   },
+   {
+    "events": 116,
+    "id": "asap-wir-nc-v2/9-3",
+    "sha256": "49113b1b965ae60488dfea78d2050fa62f5da49748895d2b72f6c251b8ef611a",
+    "sonata": 9,
+    "title": "Beethoven/Piano_Sonatas/9-3/Tysman05M"
+   }
+  ],
+  "test": [
+   {
+    "events": 208,
+    "id": "asap-wir-nc-v2/10-1",
+    "sha256": "7c27e21adcb55e043488d7282042b212d48eb069faf67504d2f639ebf836e0e4",
+    "sonata": 10,
+    "title": "Beethoven/Piano_Sonatas/10-1/Hou02M"
+   },
+   {
+    "events": 245,
+    "id": "asap-wir-nc-v2/12-1",
+    "sha256": "b265cefb9a5f8f3eb3e287332bf5ab623b7fba345b95b16d01b5f613c6ce3dc0",
+    "sonata": 12,
+    "title": "Beethoven/Piano_Sonatas/12-1/Garritson01"
+   },
+   {
+    "events": 237,
+    "id": "asap-wir-nc-v2/14-3",
+    "sha256": "9a82ad991d73357483c57fcccf5f1045ef2c02b07e3418957b75ee7b590bdbfc",
+    "sonata": 14,
+    "title": "Beethoven/Piano_Sonatas/14-3/Meek03"
+   },
+   {
+    "events": 478,
+    "id": "asap-wir-nc-v2/15-1",
+    "sha256": "ff87decf6fd20c27a2329d95007be430be1af9abddad541cff994d17b4dbf6d8",
+    "sonata": 15,
+    "title": "Beethoven/Piano_Sonatas/15-1/LEE_H01"
+   },
+   {
+    "events": 249,
+    "id": "asap-wir-nc-v2/15-4",
+    "sha256": "c649b2873864258cd9569ef98078dd676fad6f34b6b7c465019808799226b0b6",
+    "sonata": 15,
+    "title": "Beethoven/Piano_Sonatas/15-4/Floril01"
+   },
+   {
+    "events": 130,
+    "id": "asap-wir-nc-v2/21-2",
+    "sha256": "187bfdedf7d9eb781425fac76b00ee20f6e226ee01cd09a2f31dad9873e21093",
+    "sonata": 21,
+    "title": "Beethoven/Piano_Sonatas/21-2/KimSY03"
+   },
+   {
+    "events": 475,
+    "id": "asap-wir-nc-v2/21-3",
+    "sha256": "d8185e79abd90b36a7bfc08e7436c797ec2a9bd081adcae793433377eda51e1a",
+    "sonata": 21,
+    "title": "Beethoven/Piano_Sonatas/21-3/KimSY04M"
+   },
+   {
+    "events": 200,
+    "id": "asap-wir-nc-v2/26-2",
+    "sha256": "afaba2081ed6d0205920112e15a2fd45b7c31011717075394776ff73dc855218",
+    "sonata": 26,
+    "title": "Beethoven/Piano_Sonatas/26-2/HONG05M"
+   },
+   {
+    "events": 319,
+    "id": "asap-wir-nc-v2/27-1",
+    "sha256": "2ead780ac9390e60259a87d529aae3e955ff7cdffcebbc0da2a378f27680638d",
+    "sonata": 27,
+    "title": "Beethoven/Piano_Sonatas/27-1/Abdelmola01"
+   },
+   {
+    "events": 280,
+    "id": "asap-wir-nc-v2/8-1",
+    "sha256": "92439d928c92e311cea0ed927ed3cf7fdc1bb347a5c779c53d0e432e9a170ced",
+    "sonata": 8,
+    "title": "Beethoven/Piano_Sonatas/8-1/ChenS01"
+   },
+   {
+    "events": 331,
+    "id": "asap-wir-nc-v2/8-2",
+    "sha256": "1f543bbf5f070f6bcb2125ffdf467747a3e2f8157ea38823f3e738062497abc9",
+    "sonata": 8,
+    "title": "Beethoven/Piano_Sonatas/8-2/Na06"
+   },
+   {
+    "events": 157,
+    "id": "asap-wir-nc-v2/8-3",
+    "sha256": "3171d6b422dbbef9877499b74e026ac9c8cdcd8646e8670babbda1ededd55b21",
+    "sonata": 8,
+    "title": "Beethoven/Piano_Sonatas/8-3/Na06M"
+   }
+  ]
+ }
+}

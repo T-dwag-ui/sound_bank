@@ -1,0 +1,112 @@
+import 'package:meta/meta.dart';
+
+import '../services/scale_degree_classifier.dart';
+import 'chord_identity.dart';
+import 'scale_degree.dart';
+import 'tonic.dart';
+
+/// Major or minor.
+enum TonalityMode { major, minor }
+
+/// A key: a spelled [Tonic] plus a [TonalityMode] (e.g. Eb major, f# minor).
+@immutable
+class Tonality {
+  /// The spelled tonic of the key.
+  final Tonic tonic;
+
+  /// Whether the key is major or minor.
+  final TonalityMode mode;
+
+  const Tonality(this.tonic, this.mode);
+
+  /// Whether [mode] is major.
+  bool get isMajor => mode == TonalityMode.major;
+
+  /// Whether [mode] is minor.
+  bool get isMinor => mode == TonalityMode.minor;
+
+  /// Compact case-coded label: "C" for C major, "c" for C minor.
+  String get label => isMajor ? tonic.label : tonic.label.toLowerCase();
+
+  /// Full name: "C major", "F# minor".
+  String get displayName =>
+      isMajor ? '${tonic.label} major' : '${tonic.label} minor';
+
+  /// Pitch class of the tonic (0..11).
+  int get tonicPitchClass => tonic.pitchClass;
+
+  /// Returns whether the pitch class is diatonic to this tonality.
+  ///
+  /// Current behavior: natural major / natural minor pitch-class sets.
+  bool containsPitchClass(int pc) {
+    final rel = (pc - tonicPitchClass) % 12;
+    final interval = rel < 0 ? rel + 12 : rel;
+
+    if (isMajor) {
+      // Major: 0,2,4,5,7,9,11
+      return switch (interval) {
+        0 || 2 || 4 || 5 || 7 || 9 || 11 => true,
+        _ => false,
+      };
+    } else {
+      // Natural minor: 0,2,3,5,7,8,10
+      return switch (interval) {
+        0 || 2 || 3 || 5 || 7 || 8 || 10 => true,
+        _ => false,
+      };
+    }
+  }
+
+  /// Convenience: returns the diatonic scale degree for a root pitch class,
+  /// or null if non-diatonic in the current natural major/minor model.
+  ///
+  /// This delegates to [ScaleDegreeClassifier] so Tonality does not own
+  /// scale-degree mapping logic.
+  ScaleDegree? scaleDegreeForRootPc(int rootPc) =>
+      ScaleDegreeClassifier.degreeForRootPc(this, rootPc);
+
+  /// Convenience: strict functional analysis for a chord identity using the
+  /// chord's actual present-interval mask.
+  ///
+  /// This is intentionally a thin delegating wrapper; all rules live in
+  /// [ScaleDegreeClassifier].
+  ScaleDegreeAnalysis? scaleDegreeAnalysisForChord(
+    ChordIdentity id, {
+    bool rejectUnexplainedTones = true,
+    String? rootName,
+  }) {
+    return ScaleDegreeClassifier.analyzeChord(
+      this,
+      id,
+      presentIntervalsMask: id.presentIntervalsMask,
+      strictVoicingValidation: true,
+      rejectUnexplainedTones: rejectUnexplainedTones,
+      rootName: rootName,
+    );
+  }
+
+  /// Convenience: strict functional degree for a chord identity using the
+  /// chord's actual present-interval mask.
+  ScaleDegree? scaleDegreeForChord(
+    ChordIdentity id, {
+    bool rejectUnexplainedTones = true,
+    String? rootName,
+  }) {
+    return scaleDegreeAnalysisForChord(
+      id,
+      rejectUnexplainedTones: rejectUnexplainedTones,
+      rootName: rootName,
+    )?.degree;
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Tonality && other.tonic == tonic && other.mode == mode;
+
+  @override
+  int get hashCode => Object.hash(tonic, mode);
+
+  @override
+  String toString() => displayName;
+}

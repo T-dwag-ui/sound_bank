@@ -1,0 +1,82 @@
+import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
+
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'package:whatchord_app/features/input/input.dart';
+import 'package:whatchord_app/features/lookup/lookup.dart';
+
+import 'audio_monitor_notifier.dart';
+import 'audio_monitor_settings_notifier.dart';
+
+final appAudioMonitorLifecycleProvider = Provider<void>((ref) {
+  ref.listen<AsyncValue<InputNoteEvent>>(inputNoteEventsProvider, (
+    previous,
+    next,
+  ) {
+    final event = next.asData?.value;
+    if (event == null) return;
+    ref.read(audioMonitorNotifier.notifier).onInputNoteEvent(event);
+  });
+
+  // Lookup notes are a held selection (for analysis), not a live event stream,
+  // so strike each newly tapped note as a transient preview instead of letting
+  // it ring indefinitely. Strike the actual stacked octave so repeats are
+  // audibly higher.
+  ref.listen<List<int>>(lookupVoicingProvider, (previous, next) {
+    final prev = previous ?? const <int>[];
+    if (next.length <= prev.length) return;
+    if (!ref.read(audioMonitorActiveProvider)) return;
+
+    ref.read(audioMonitorNotifier.notifier).playPreviewNotes([next.last]);
+  });
+
+  final controller = _AudioMonitorLifecycleController(ref);
+  controller.attach();
+  ref.onDispose(controller.detach);
+});
+
+class _AudioMonitorLifecycleController with WidgetsBindingObserver {
+  _AudioMonitorLifecycleController(this._ref);
+
+  final Ref _ref;
+  bool _attached = false;
+
+  void attach() {
+    if (_attached) return;
+    _attached = true;
+    WidgetsBinding.instance.addObserver(this);
+
+    // Ensure the monitor notifier is created early.
+    _ref.read(audioMonitorNotifier.notifier);
+  }
+
+  void detach() {
+    if (!_attached) return;
+    _attached = false;
+    WidgetsBinding.instance.removeObserver(this);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    final monitor = _ref.read(audioMonitorNotifier.notifier);
+
+    switch (state) {
+      case AppLifecycleState.resumed:
+        monitor.setBackgrounded(false);
+        break;
+      case AppLifecycleState.inactive:
+        // iOS system interruptions (alarms/calls) can leave the output unit in
+        // a bad state unless it is rebuilt on resume.
+        if (defaultTargetPlatform == TargetPlatform.iOS) {
+          monitor.setBackgrounded(true);
+        }
+        break;
+      case AppLifecycleState.paused:
+      case AppLifecycleState.hidden:
+      case AppLifecycleState.detached:
+        monitor.setBackgrounded(true);
+        break;
+    }
+  }
+}

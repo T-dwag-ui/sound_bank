@@ -1,0 +1,12 @@
+name: General issue
+description: Bug reports, questions, or general feedback about WhatChord
+labels:
+  - triage
+body:
+  - type: textarea
+    attributes:
+      label: Description
+      description: |
+        Please describe the issue, question, or suggestion.
+    validations:
+      required: true

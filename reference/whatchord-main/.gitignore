@@ -1,0 +1,90 @@
+# --- Flutter app template -------------------------------------
+# Source: https://github.com/flutter/flutter/blob/be9b20458a46e6b87f572d8ed681e3ddae6efd3a/packages/flutter_tools/templates/app/.gitignore.tmpl
+
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# The .vscode folder contains launch configuration and tasks you configure in
+# VS Code which you may wish to be included in version control, so this line
+# is commented out by default.
+#.vscode/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+/coverage/
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Android Studio will place build artifacts here
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+# Widget Preview related
+.widget_preview/
+
+# --- WhatChord-specific ---------------------------------------
+
+# Local tool and package state
+.astro/
+.venv/
+.wrangler/
+node_modules/
+
+# Generated website output
+/docs/site/dist/
+
+# Generated WhatChord Symbols assets
+tool/whatchord_symbols/Leland.otf
+tool/whatchord_symbols/LelandText.otf
+tool/whatchord_symbols/specimen.svg
+
+# Flutter diagnostics
+bugreport-*.zip
+flutter_*.png
+
+# Release artifacts and signing certificates
+/dist/
+android/*.jks
+android/*.p12
+android/key.properties
+*.keychain
+*.keychain-db
+ios-signing.keychain-db
+
+# Generated credentials from google-github-actions/auth
+gha-creds-*.json
+
+# Android project build output outside the template paths
+/android/build/
+
+# Benchmark run output (transient; baseline is committed separately)
+/benchmark/last_run.json
+/benchmark/noise.json

@@ -1,0 +1,30 @@
+name: on published release
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  upload_build_android:
+    name: upload build
+    permissions:
+      contents: read
+      id-token: write
+    if: github.event.release.prerelease == false
+    uses: EarthmanMuons/reusable-workflows/.github/workflows/upload-build-android.yml@main
+    with:
+      release_tag: ${{ github.event.release.tag_name }}
+      track: production
+      release_status: draft
+
+  upload_build_ios:
+    name: upload build
+    if: github.event.release.prerelease == false
+    uses: EarthmanMuons/reusable-workflows/.github/workflows/upload-build-ios.yml@main
+    secrets:
+      ASC_AUTH_KEY_B64: ${{ secrets.ASC_AUTH_KEY_B64 }}
+    with:
+      release_tag: ${{ github.event.release.tag_name }}

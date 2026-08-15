@@ -1,0 +1,64 @@
+/// Compile-time gate for [EngineCounters].
+///
+/// When `whatchord.counters` is not defined (the default, which includes every
+/// release build), this resolves to a `const false`. Each guarded
+/// `if (engineCountersEnabled) ...` call site then folds to `if (false)` and is
+/// dead-code eliminated by the compiler, so the counters cost nothing in normal
+/// builds.
+///
+/// Enable them for the benchmark harness with:
+///
+/// ```
+/// dart run --define=whatchord.counters=true benchmark/analyze_benchmark.dart
+/// ```
+const bool engineCountersEnabled = bool.fromEnvironment('whatchord.counters');
+
+/// Deterministic, hardware-independent tallies of analysis work.
+///
+/// These count algorithmic steps (cache lookups, roots considered, templates
+/// evaluated, candidates produced, candidates ranked) rather than wall-clock
+/// time, so they are a reproducible regression signal regardless of the machine.
+/// Only mutated when [engineCountersEnabled] is true; otherwise the increments
+/// compile away.
+abstract final class EngineCounters {
+  /// Analysis results served from the cache.
+  static int cacheHits = 0;
+
+  /// Analyses that had to run the full pipeline.
+  static int cacheMisses = 0;
+
+  /// Candidate roots enumerated across analyses.
+  static int rootsConsidered = 0;
+
+  /// Quality templates priced across analyses.
+  static int templatesEvaluated = 0;
+
+  /// Candidates produced before pruning.
+  static int candidatesProduced = 0;
+
+  /// Candidates that survive the pre-ranking prune and enter the O(n^2)
+  /// ranking. Diverges from [candidatesProduced] by the pruned tail, so it is
+  /// the deterministic signal for the prune's effect (and any regression that
+  /// quietly defeats it).
+  static int candidatesRanked = 0;
+
+  /// Zeroes all counters.
+  static void reset() {
+    cacheHits = 0;
+    cacheMisses = 0;
+    rootsConsidered = 0;
+    templatesEvaluated = 0;
+    candidatesProduced = 0;
+    candidatesRanked = 0;
+  }
+
+  /// The current counter values by name.
+  static Map<String, int> snapshot() => <String, int>{
+    'cacheHits': cacheHits,
+    'cacheMisses': cacheMisses,
+    'rootsConsidered': rootsConsidered,
+    'templatesEvaluated': templatesEvaluated,
+    'candidatesProduced': candidatesProduced,
+    'candidatesRanked': candidatesRanked,
+  };
+}

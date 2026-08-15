@@ -1,0 +1,57 @@
+---
+import { getEntries, type CollectionEntry } from "astro:content";
+
+import ArticleCard from "../components/ArticleCard.astro";
+import ArticleCta from "../components/ArticleCta.astro";
+import ExternalArticleCard from "../components/ExternalArticleCard.astro";
+import BaseLayout from "./BaseLayout.astro";
+
+interface Props {
+  article: CollectionEntry<"articles">;
+}
+
+const { article } = Astro.props;
+const related = await getEntries(article.data.related);
+---
+
+<BaseLayout
+  bodyClass="article-page"
+  canonicalPath={`/articles/${article.id}.html`}
+  description={article.data.description}
+  image={article.data.socialImage?.src}
+  imageAlt={article.data.socialImage?.alt}
+  socialDescription={article.data.socialDescription}
+  socialTitle={article.data.socialTitle}
+  socialType="article"
+  title={`${article.data.socialTitle} | WhatChord`}
+>
+  <article>
+    <div class="article-wrap">
+      <header class="article-header">
+        <div class="article-header-meta">
+          <a class="article-back" href="/articles/">← Articles</a>
+          <div class="article-tag">{article.data.tag}</div>
+        </div>
+        <h1>{article.data.title}</h1>
+        {
+          article.data.decks.map((deck) => (
+            <p class="article-deck" set:html={deck} />
+          ))
+        }
+      </header>
+      <div class="article-body">
+        <slot />
+        <ArticleCta cta={article.data.cta} />
+        <div class="article-related">
+          <h4>Related reading</h4>
+          {related.map((entry) => <ArticleCard article={entry} showTag />)}
+          {
+            article.data.relatedExternal?.map((entry) => (
+              <ExternalArticleCard {...entry} />
+            ))
+          }
+        </div>
+      </div>
+    </div>
+  </article>
+</BaseLayout>

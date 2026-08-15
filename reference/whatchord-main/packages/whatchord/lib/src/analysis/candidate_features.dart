@@ -1,0 +1,538 @@
+import '../models/chord_candidate.dart';
+import '../models/chord_extension.dart';
+import '../models/chord_identity.dart';
+import '../models/chord_tone_role.dart';
+import '../models/observed_voicing.dart';
+import '../services/bit_masks.dart';
+import '../services/interval_constants.dart';
+import '../services/pitch_class.dart';
+import 'voicing_evidence.dart';
+
+/// Cached features extracted from a ChordCandidate for efficient rule evaluation.
+///
+/// Pre-computes properties like position, quality family, extension types,
+/// dominant7-specific characteristics, and (when a voicing is supplied)
+/// register evidence, to avoid repeated calculations during rule application.
+class CandidateFeatures {
+  final bool isRootPosition;
+  final bool isSixFamily;
+  final bool isSeventhFamily;
+  final bool isDim7;
+  final bool isDimFamily;
+  final bool isSus;
+  final bool isRootPositionMinor7Add11Shell;
+  final bool isCompleteTriad;
+  final bool isCompleteMajorMinorTriad;
+  final bool isCompleteMajorTriadInversion;
+  final bool isCompleteNinthBassSeventhChord;
+  final bool isRootDominantSus;
+  final bool isRootPositionNaturalAddChord;
+  final bool isStructurallyDeficient;
+  final bool isUnusualSeventhQuality;
+
+  final bool isDom7;
+  final bool isAlteredFifthDom7;
+  final bool isDom7RootPosition;
+  final bool isDom7Slash;
+  final bool dom7HasShell;
+  final bool dom7SlashHasNonBassAlterations;
+  final bool isCompleteAlteredFifthDominant;
+  final bool isFifthlessFlatNineBassDominant;
+
+  final bool isSlashBass;
+  final int bassRoleRank;
+  final bool bassIsColorTone;
+  final bool hasStableBassRole;
+
+  final int extensionCount;
+  final int extensionTensionCount;
+  final bool isQuestionableAdd11Slash;
+  final ExtensionPreference extPref;
+  final bool hasRealExt;
+  final bool hasAlteredColor;
+  final bool hasNaturalOrAlteredColor;
+  final bool hasOnlyAddColor;
+  final int unnamedToneCount;
+
+  // Voicing evidence (false when no voicing was supplied).
+  final bool isVoicingUpperStructureSlash;
+
+  const CandidateFeatures({
+    required this.isRootPosition,
+    required this.isSixFamily,
+    required this.isSeventhFamily,
+    required this.isDim7,
+    required this.isDimFamily,
+    required this.isSus,
+    required this.isRootPositionMinor7Add11Shell,
+    required this.isCompleteTriad,
+    required this.isCompleteMajorMinorTriad,
+    required this.isCompleteMajorTriadInversion,
+    required this.isCompleteNinthBassSeventhChord,
+    required this.isRootDominantSus,
+    required this.isRootPositionNaturalAddChord,
+    required this.isStructurallyDeficient,
+    required this.isUnusualSeventhQuality,
+    required this.isDom7,
+    required this.isAlteredFifthDom7,
+    required this.isDom7RootPosition,
+    required this.isDom7Slash,
+    required this.dom7HasShell,
+    required this.dom7SlashHasNonBassAlterations,
+    required this.isCompleteAlteredFifthDominant,
+    required this.isFifthlessFlatNineBassDominant,
+    required this.isSlashBass,
+    required this.bassRoleRank,
+    required this.bassIsColorTone,
+    required this.hasStableBassRole,
+    required this.extensionCount,
+    required this.extensionTensionCount,
+    required this.isQuestionableAdd11Slash,
+    required this.extPref,
+    required this.hasRealExt,
+    required this.hasAlteredColor,
+    required this.hasNaturalOrAlteredColor,
+    required this.hasOnlyAddColor,
+    required this.unnamedToneCount,
+    this.isVoicingUpperStructureSlash = false,
+  });
+
+  factory CandidateFeatures.from(ChordCandidate c, {ObservedVoicing? voicing}) {
+    final id = c.identity;
+    final q = id.quality;
+
+    final rootPos = id.rootPc == id.bassPc;
+    final pref = extensionPreference(
+      id.extensions,
+      sharp11AsNaturalColor: q.sharp11IsNaturalColor,
+    );
+    final realExt = (pref.naturalCount + pref.alterationCount) > 0;
+    final bassRoleRank = _bassRoleRank(id);
+
+    final isDim7 = q == ChordQuality.diminished7;
+    final isDimFamily = isDim7 || q == ChordQuality.halfDiminished7;
+    final isSlashBass = !rootPos;
+    final bassIsColorTone = isSlashBass ? _bassIsColorTone(id) : false;
+
+    final isDom7 = q == ChordQuality.dominant7;
+    final isAlteredFifthDom7 =
+        q == ChordQuality.dominant7Flat5 || q == ChordQuality.dominant7Sharp5;
+    final isDom7RootPosition = isDom7 && rootPos;
+    final isDom7Slash = isDom7 && isSlashBass;
+
+    final dom7HasShell = (isDom7 || isAlteredFifthDom7) && _dom7HasShell(id);
+    final dom7SlashHasNonBassAlterations =
+        isDom7Slash && _dom7SlashHasNonBassAlterations(id);
+
+    final hasMaj3Nat11 = _hasMajorThirdNaturalEleventh(id);
+
+    return CandidateFeatures(
+      isRootPosition: rootPos,
+      isSixFamily: q.isSixFamily,
+      isSeventhFamily: q.isSeventhFamily,
+      isDim7: isDim7,
+      isDimFamily: isDimFamily,
+      isSus: q.isSus,
+      isRootPositionMinor7Add11Shell: _isRootPositionMinor7Add11Shell(
+        id,
+        rootPos,
+      ),
+      isCompleteTriad: _isCompleteTriadCore(id),
+      isCompleteMajorMinorTriad: _isCompleteMajorMinorTriadCore(id),
+      isCompleteMajorTriadInversion: _isCompleteMajorTriadInversion(
+        id,
+        rootPos,
+      ),
+      isCompleteNinthBassSeventhChord: _isCompleteNinthBassSeventhChord(id),
+      isRootDominantSus: _isRootDominantSus(id, rootPos),
+      isRootPositionNaturalAddChord:
+          rootPos &&
+          (q == ChordQuality.major ||
+              q == ChordQuality.minor ||
+              q == ChordQuality.major6 ||
+              q == ChordQuality.minor6) &&
+          pref.alterationCount == 0 &&
+          pref.naturalCount == 0,
+      isStructurallyDeficient: _isStructurallyDeficient(id, rootPos),
+      isUnusualSeventhQuality: q.isUnusualSeventhQuality,
+      isDom7: isDom7,
+      isAlteredFifthDom7: isAlteredFifthDom7,
+      isDom7RootPosition: isDom7RootPosition,
+      isDom7Slash: isDom7Slash,
+      dom7HasShell: dom7HasShell,
+      dom7SlashHasNonBassAlterations: dom7SlashHasNonBassAlterations,
+      isCompleteAlteredFifthDominant: _isCompleteAlteredFifthDominant(id),
+      isFifthlessFlatNineBassDominant: _isFifthlessFlatNineBassDominant(id),
+      isSlashBass: isSlashBass,
+      bassRoleRank: bassRoleRank,
+      bassIsColorTone: bassIsColorTone,
+      hasStableBassRole: bassRoleRank <= 2,
+      extensionCount: id.extensions.length,
+      extensionTensionCount: _extensionTensionCount(pref, hasMaj3Nat11),
+      isQuestionableAdd11Slash: _isQuestionableAdd11Slash(
+        id,
+        rootPos,
+        hasMaj3Nat11,
+      ),
+      extPref: pref,
+      hasRealExt: realExt,
+      hasAlteredColor: pref.alterationCount > 0,
+      hasNaturalOrAlteredColor: (pref.naturalCount + pref.alterationCount) > 0,
+      hasOnlyAddColor:
+          pref.addCount > 0 &&
+          pref.alterationCount == 0 &&
+          pref.naturalCount == 0,
+      unnamedToneCount:
+          popCount(id.presentIntervalsMask) - id.toneRolesByInterval.length,
+      isVoicingUpperStructureSlash:
+          voicing != null &&
+          VoicingEvidence.supportsUpperStructureSlash(id, voicing),
+    );
+  }
+
+  /// Returns true for a fifthless dominant7 flat-nine shell whose flat-ninth is
+  /// the bass note. A simultaneous natural ninth is still the same split-ninth
+  /// dominant color.
+  ///
+  /// This identifies the narrow ambiguous shape that can be heard as a familiar
+  /// altered-dominant shell or as a more remote chord rooted on the bass.
+  static bool _isFifthlessFlatNineBassDominant(ChordIdentity id) {
+    if (id.quality != ChordQuality.dominant7) return false;
+    if (!id.extensions.contains(ChordExtension.flat9)) {
+      return false;
+    }
+    if (id.extensions.any(
+      (extension) =>
+          extension != ChordExtension.flat9 && extension != ChordExtension.nine,
+    )) {
+      return false;
+    }
+
+    final roles = id.toneRolesByInterval.values;
+    if (!roles.contains(ChordToneRole.root) ||
+        !roles.contains(ChordToneRole.major3) ||
+        !roles.contains(ChordToneRole.flat7) ||
+        roles.contains(ChordToneRole.perfect5)) {
+      return false;
+    }
+
+    final bassInterval = intervalAboveRoot(id.bassPc, id.rootPc);
+    if (bassInterval != 1) return false;
+    return id.toneRolesByInterval[bassInterval] == ChordToneRole.flat9;
+  }
+
+  static bool _isCompleteAlteredFifthDominant(ChordIdentity id) {
+    final quality = id.quality;
+    if (quality != ChordQuality.dominant7Flat5 &&
+        quality != ChordQuality.dominant7Sharp5) {
+      return false;
+    }
+
+    final roles = id.toneRolesByInterval.values;
+    final hasAlteredFifth =
+        roles.contains(ChordToneRole.flat5) ||
+        roles.contains(ChordToneRole.sharp5);
+    return roles.contains(ChordToneRole.root) &&
+        roles.contains(ChordToneRole.major3) &&
+        hasAlteredFifth &&
+        roles.contains(ChordToneRole.flat7);
+  }
+
+  static bool _isRootPositionMinor7Add11Shell(
+    ChordIdentity id,
+    bool rootPosition,
+  ) {
+    if (!rootPosition ||
+        id.quality != ChordQuality.minor7 ||
+        id.extensions.length != 1 ||
+        !_hasNaturalEleventhColor(id.extensions)) {
+      return false;
+    }
+
+    final roles = id.toneRolesByInterval.values;
+    return roles.contains(ChordToneRole.root) &&
+        roles.contains(ChordToneRole.minor3) &&
+        roles.contains(ChordToneRole.flat7) &&
+        (roles.contains(ChordToneRole.add11) ||
+            roles.contains(ChordToneRole.eleven));
+  }
+
+  /// A natural eleventh with no ninth reads as a stacked `eleven`; without a
+  /// seventh it is an `add11`. Both spell the same minor-eleventh shell color.
+  static bool _hasNaturalEleventhColor(Set<ChordExtension> extensions) =>
+      extensions.contains(ChordExtension.add11) ||
+      extensions.contains(ChordExtension.eleven);
+
+  static bool _isCompleteMajorMinorTriadCore(ChordIdentity id) {
+    final q = id.quality;
+    if (q != ChordQuality.major && q != ChordQuality.minor) {
+      return false;
+    }
+    if (id.extensions.any(
+      (extension) => _isTriadCoreDestabilizingExtension(extension, quality: q),
+    )) {
+      return false;
+    }
+
+    final roles = id.toneRolesByInterval.values;
+    final hasThird = q == ChordQuality.major
+        ? roles.contains(ChordToneRole.major3)
+        : roles.contains(ChordToneRole.minor3);
+
+    return roles.contains(ChordToneRole.root) &&
+        hasThird &&
+        roles.contains(ChordToneRole.perfect5);
+  }
+
+  static bool _isCompleteTriadCore(ChordIdentity id) {
+    final q = id.quality;
+    if (q == ChordQuality.diminished) {
+      if (id.extensions.isNotEmpty) return false;
+
+      final roles = id.toneRolesByInterval.values;
+      return roles.contains(ChordToneRole.root) &&
+          roles.contains(ChordToneRole.minor3) &&
+          roles.contains(ChordToneRole.flat5);
+    }
+
+    return _isCompleteMajorMinorTriadCore(id);
+  }
+
+  static bool _isCompleteMajorTriadInversion(ChordIdentity id, bool rootPos) {
+    if (rootPos) return false;
+    if (id.quality != ChordQuality.major) return false;
+    if (_bassRoleRank(id) > 2) return false;
+
+    final roles = id.toneRolesByInterval.values;
+    return roles.contains(ChordToneRole.root) &&
+        roles.contains(ChordToneRole.major3) &&
+        roles.contains(ChordToneRole.perfect5);
+  }
+
+  static bool _isTriadCoreDestabilizingExtension(
+    ChordExtension extension, {
+    required ChordQuality quality,
+  }) {
+    if (quality == ChordQuality.major && extension == ChordExtension.add11) {
+      return true;
+    }
+
+    return extension == ChordExtension.flat9 ||
+        extension == ChordExtension.sharp9 ||
+        extension == ChordExtension.addSharp9 ||
+        extension == ChordExtension.sharp11 ||
+        extension == ChordExtension.flat13;
+  }
+
+  static bool _isCompleteNinthBassSeventhChord(ChordIdentity id) {
+    if (!id.quality.isSeventhFamily) return false;
+    if (id.rootPc == id.bassPc) return false;
+    if (id.extensions.length != 1 ||
+        !id.extensions.contains(ChordExtension.nine)) {
+      return false;
+    }
+
+    final bassInterval = intervalAboveRoot(id.bassPc, id.rootPc);
+    if (bassInterval != majorSecondInterval) return false;
+
+    final roles = id.toneRolesByInterval.values;
+    final hasThird =
+        roles.contains(ChordToneRole.major3) ||
+        roles.contains(ChordToneRole.minor3) ||
+        roles.contains(ChordToneRole.sus2) ||
+        roles.contains(ChordToneRole.sus4);
+    final hasSeventh =
+        roles.contains(ChordToneRole.flat7) ||
+        roles.contains(ChordToneRole.major7);
+
+    return roles.contains(ChordToneRole.root) &&
+        hasThird &&
+        roles.contains(ChordToneRole.perfect5) &&
+        hasSeventh;
+  }
+
+  static bool _isRootDominantSus(ChordIdentity id, bool rootPos) {
+    if (!rootPos) return false;
+    final q = id.quality;
+    if (q != ChordQuality.dominant7sus2 && q != ChordQuality.dominant7sus4) {
+      return false;
+    }
+
+    final roles = id.toneRolesByInterval.values;
+    final hasSuspension = q == ChordQuality.dominant7sus2
+        ? roles.contains(ChordToneRole.sus2)
+        : roles.contains(ChordToneRole.sus4);
+    return hasSuspension && roles.contains(ChordToneRole.flat7);
+  }
+
+  /// A reading that omits a core triad tone in a way that makes it weaker than
+  /// a competing complete major/minor triad: a plain suspended triad (no third
+  /// and no seventh) or a seventh-family slash that omits every fifth.
+  static bool _isStructurallyDeficient(ChordIdentity id, bool rootPos) {
+    final q = id.quality;
+
+    // Plain suspended triad: no third, and no seventh that would make it a real
+    // dominant/major sus. Dominant7sus/major7sus keep their seventh and are not
+    // deficient.
+    if (q == ChordQuality.sus2 || q == ChordQuality.sus4) {
+      return true;
+    }
+
+    // Seventh-family slash that omits every fifth (perfect, diminished, or
+    // augmented). Root-position fifthless sevenths are common and intentional,
+    // as are nine-supported fifthless stacks (Dbmaj9#11/C), so only the
+    // inverted/slash form without a ninth counts as deficient here.
+    if (q.isSeventhFamily &&
+        !rootPos &&
+        !id.extensions.contains(ChordExtension.nine)) {
+      final roles = id.toneRolesByInterval.values;
+      final hasFifth =
+          roles.contains(ChordToneRole.perfect5) ||
+          roles.contains(ChordToneRole.flat5) ||
+          roles.contains(ChordToneRole.sharp5);
+      if (!hasFifth) return true;
+    }
+
+    return false;
+  }
+
+  static bool _isQuestionableAdd11Slash(
+    ChordIdentity id,
+    bool rootPos,
+    bool hasMaj3Nat11,
+  ) {
+    if (rootPos) return false;
+    if (id.quality == ChordQuality.dominant7 ||
+        id.quality == ChordQuality.dominant7Flat5 ||
+        id.quality == ChordQuality.dominant7Sharp5) {
+      return false;
+    }
+    return hasMaj3Nat11;
+  }
+
+  static int _extensionTensionCount(
+    ExtensionPreference pref,
+    bool hasMaj3Nat11,
+  ) {
+    var count = pref.alterationCount;
+
+    // A natural 11 against a major third is at least as harmonically loaded as
+    // an altered color. Do not let the "fewer alterations" tie-breaker prefer
+    // this spelling over an otherwise stronger #11/rooted interpretation.
+    if (hasMaj3Nat11) count++;
+
+    return count;
+  }
+
+  static bool _hasMajorThirdNaturalEleventh(ChordIdentity id) {
+    final roles = id.toneRolesByInterval.values;
+    final hasMajorThird = roles.contains(ChordToneRole.major3);
+    final hasNaturalEleventh =
+        id.extensions.contains(ChordExtension.add11) ||
+        id.extensions.contains(ChordExtension.eleven);
+    return hasMajorThird && hasNaturalEleventh;
+  }
+
+  /// Returns true if the voicing contains the dominant7 "shell" (major 3rd + flat 7th).
+  /// Shell tones are the minimal chord tones that define dominant function.
+  static bool _dom7HasShell(ChordIdentity id) {
+    final roles = id.toneRolesByInterval.values;
+    final has3 = roles.contains(ChordToneRole.major3);
+    final has7 = roles.contains(ChordToneRole.flat7);
+    return has3 && has7;
+  }
+
+  static bool _dom7SlashHasNonBassAlterations(ChordIdentity id) {
+    if (id.quality != ChordQuality.dominant7) return false;
+    if (id.rootPc == id.bassPc) return false;
+
+    // Identify which extension token corresponds to the bass role (if any),
+    // so we can ignore it when deciding if the chord has "extra" alterations.
+    final bassInterval = intervalAboveRoot(id.bassPc, id.rootPc);
+    final bassRole = id.toneRolesByInterval[bassInterval];
+    final bassExt = _extensionFromRole(bassRole);
+
+    // Look for any alteration extensions other than the one explained by bass.
+    for (final e in id.extensions) {
+      if (e == bassExt) continue;
+      if (_isAlterationExtension(e)) return true;
+    }
+    return false;
+  }
+
+  static bool _isAlterationExtension(ChordExtension e) {
+    return e == ChordExtension.flat9 ||
+        e == ChordExtension.sharp9 ||
+        e == ChordExtension.sharp11 ||
+        e == ChordExtension.flat13;
+  }
+
+  static ChordExtension? _extensionFromRole(ChordToneRole? role) {
+    // Only roles that map cleanly to ChordExtension tokens.
+    return switch (role) {
+      ChordToneRole.flat9 => ChordExtension.flat9,
+      ChordToneRole.sharp9 => ChordExtension.sharp9,
+      ChordToneRole.sharp11 => ChordExtension.sharp11,
+      ChordToneRole.flat13 => ChordExtension.flat13,
+      ChordToneRole.nine => ChordExtension.nine,
+      ChordToneRole.eleven => ChordExtension.eleven,
+      ChordToneRole.thirteen => ChordExtension.thirteen,
+      ChordToneRole.add9 => ChordExtension.add9,
+      ChordToneRole.addSharp9 => ChordExtension.addSharp9,
+      ChordToneRole.splitMinor3 => ChordExtension.addSharp9,
+      ChordToneRole.add11 => ChordExtension.add11,
+      ChordToneRole.add13 => ChordExtension.add13,
+      _ => null,
+    };
+  }
+
+  /// Returns true when the bass is acting as a color tone (extension/alteration)
+  /// rather than a core inversion tone (3rd/5th/7th).
+  ///
+  /// This distinction helps identify upper-structure voicings vs traditional inversions.
+  static bool _bassIsColorTone(ChordIdentity id) {
+    final interval = intervalAboveRoot(id.bassPc, id.rootPc);
+    final role = id.toneRolesByInterval[interval];
+
+    if (role == null) {
+      // Conservative: don't treat unknown bass-role as "color"
+      // (prevents over-promoting slash interpretations).
+      return false;
+    }
+
+    return !_isCoreInversionBassRole(role);
+  }
+
+  static bool _isCoreInversionBassRole(ChordToneRole role) {
+    return role == ChordToneRole.root ||
+        role == ChordToneRole.major3 ||
+        role == ChordToneRole.minor3 ||
+        role == ChordToneRole.perfect5 ||
+        role == ChordToneRole.flat5 ||
+        role == ChordToneRole.sharp5 ||
+        role == ChordToneRole.sixth ||
+        role == ChordToneRole.flat7 ||
+        role == ChordToneRole.major7 ||
+        role == ChordToneRole.dim7;
+  }
+
+  static int _bassRoleRank(ChordIdentity id) {
+    final interval = intervalAboveRoot(id.bassPc, id.rootPc);
+    final role = id.toneRolesByInterval[interval];
+
+    // Rank inversions by commonality/stability:
+    if (role == ChordToneRole.root) return 0; // Root position
+    if (role == ChordToneRole.minor3 || role == ChordToneRole.major3) {
+      return 1; // 1st inv (3rd in bass)
+    }
+    if (role == ChordToneRole.perfect5) {
+      return 2; // 2nd inv (fifth in bass)
+    }
+    if (role == ChordToneRole.dim7 ||
+        role == ChordToneRole.flat7 ||
+        role == ChordToneRole.major7) {
+      return 3; // 3rd inv (7th in bass)
+    }
+    return 4; // Other slash chords
+  }
+}

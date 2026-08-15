@@ -1,0 +1,99 @@
+---
+import { getCollection } from "astro:content";
+
+import ArticleCard from "../../components/ArticleCard.astro";
+import ExternalArticleCard from "../../components/ExternalArticleCard.astro";
+import StoreBadges from "../../components/StoreBadges.astro";
+import { researchProjects } from "../../data/researchProjects";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+const articles = (await getCollection("articles")).sort(
+  (a, b) => a.data.indexOrder - b.data.indexOrder,
+);
+const musicianArticles = articles.filter(
+  (article) => article.data.group === "musicians",
+);
+const technicalArticles = articles.filter(
+  (article) => article.data.group === "technical",
+);
+---
+
+<BaseLayout
+  bodyClass="articles-index-page"
+  canonicalPath="/articles/"
+  currentNav="articles"
+  description="Writing on chords, harmony, and how WhatChord works: guides for musicians on naming, writing, and identifying chords, plus technical deep-dives and research notes behind the analysis engine."
+  socialDescription="Guides for musicians on naming, writing, and identifying chords, plus technical deep-dives and research notes behind the analysis engine."
+  socialTitle="WhatChord Articles"
+  title="Articles | WhatChord"
+>
+  <main>
+    <section class="articles-section articles-index">
+      <div class="wrap">
+        <div class="section-label">Articles</div>
+        <h1 class="section-title">
+          Writing on chords, harmony, and how WhatChord works.
+        </h1>
+        <p class="section-sub">
+          Guides for musicians on naming, writing, and identifying chords, plus
+          technical deep-dives and research notes behind the analysis engine.
+        </p>
+
+        <div class="article-group">
+          <h2 id="for-musicians">For Musicians</h2>
+          <div class="article-group-grid">
+            {
+              musicianArticles.map((article) => (
+                <ArticleCard article={article} />
+              ))
+            }
+          </div>
+        </div>
+
+        <div class="article-group">
+          <h2 id="technical-deep-dives">Technical Deep-Dives</h2>
+          <div class="article-group-grid">
+            {
+              technicalArticles.map((article) => (
+                <ArticleCard article={article} />
+              ))
+            }
+          </div>
+        </div>
+
+        <div class="article-group">
+          <h2 id="research-projects">Research Projects</h2>
+          <p class="article-group-sub">
+            The open, reproducible investigations behind the app’s features,
+            developed and versioned in the source repository.
+          </p>
+          <div class="article-group-grid">
+            {
+              researchProjects.map((project) => (
+                <ExternalArticleCard {...project} />
+              ))
+            }
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="try-teaser">
+      <div class="wrap">
+        <div class="try-teaser-card">
+          <div class="section-label">Free download</div>
+          <h2>Bring it to your own keyboard.</h2>
+          <p class="section-sub">
+            Available for iOS and Android, with no subscription, no ads, and
+            every analysis running on-device.
+          </p>
+          <StoreBadges spaced />
+          <p class="cta-secondary">
+            Prefer not to install?{" "}
+            <a href="/try">Try identifying chords in your browser →</a>
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+</BaseLayout>

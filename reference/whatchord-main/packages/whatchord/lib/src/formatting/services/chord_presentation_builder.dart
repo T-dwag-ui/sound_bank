@@ -1,0 +1,209 @@
+import '../../models/chord_identity.dart';
+import '../../models/chord_tone_role.dart';
+import '../../models/tonality.dart';
+import '../../services/bit_masks.dart';
+import '../../services/chord_member_degree_formatter.dart';
+import '../../services/chord_member_speller.dart';
+import '../../services/note_spelling.dart';
+import '../models/chord_presentation.dart';
+import '../models/chord_symbol.dart';
+import 'chord_long_form_formatter.dart';
+import 'chord_spoken_name_formatter.dart';
+import 'chord_symbol_builder.dart';
+
+/// Renders a chord identity into a complete [ChordPresentation]: symbol,
+/// spoken and long-form names, spelled members, and an example voicing.
+abstract final class ChordPresentationBuilder {
+  /// Builds the presentation for [identity] in the key of [tonality].
+  static ChordPresentation fromIdentity({
+    required ChordIdentity identity,
+    required Tonality tonality,
+    required ChordNotationStyle notation,
+    NoteNameSystem noteNameSystem = NoteNameSystem.international,
+    String? rootName,
+  }) {
+    final memberPitchClasses = chordMemberPitchClassesFromMask(
+      rootPc: identity.rootPc,
+      presentIntervalsMask: identity.presentIntervalsMask,
+    );
+
+    // Resolve the displayed root once so the symbol and the scale-degree label
+    // are always derived from the same spelling and cannot diverge.
+    final resolvedRootName =
+        rootName ?? spellChordRoot(identity, tonality: tonality);
+
+    return ChordPresentation(
+      identity: identity,
+      symbol: ChordSymbolBuilder.fromIdentity(
+        identity: identity,
+        tonality: tonality,
+        notation: notation,
+        rootName: resolvedRootName,
+      ),
+      longLabel: ChordLongFormFormatter.format(
+        identity: identity,
+        tonality: tonality,
+        noteNameSystem: noteNameSystem,
+        rootNameOverride: resolvedRootName,
+      ),
+      semanticLabel: ChordLongFormFormatter.format(
+        identity: identity,
+        tonality: tonality,
+        noteNameSystem: noteNameSystem,
+        accidentalStyle: ChordLongFormAccidentalStyle.plainText,
+        rootNameOverride: resolvedRootName,
+      ),
+      spokenLabel: ChordSpokenNameFormatter.format(
+        identity: identity,
+        tonality: tonality,
+        noteNameSystem: noteNameSystem,
+        rootNameOverride: resolvedRootName,
+      ),
+      members: ChordMemberSpeller.spellMembers(
+        identity: identity,
+        pitchClasses: memberPitchClasses,
+        tonality: tonality,
+        rootName: resolvedRootName,
+      ),
+      memberDegrees: ChordMemberDegreeFormatter.formatDegrees(
+        identity: identity,
+        pitchClasses: memberPitchClasses,
+      ),
+      memberPitchClasses: memberPitchClasses,
+      scaleDegreeAnalysis: tonality.scaleDegreeAnalysisForChord(
+        identity,
+        rootName: resolvedRootName,
+      ),
+      normalizedVoicing: normalizedVoicingForIdentity(identity),
+    );
+  }
+
+  /// The pitch classes present in a chord, from its root and interval mask.
+  static Set<int> chordMemberPitchClassesFromMask({
+    required int rootPc,
+    required int presentIntervalsMask,
+  }) {
+    return Set<int>.unmodifiable({
+      for (final interval in intervalsFromMask(presentIntervalsMask))
+        (rootPc + interval) % 12,
+    });
+  }
+
+  /// The chord's present intervals in ascending stack order.
+  static List<int> sortedIntervalsForIdentity(ChordIdentity identity) {
+    final intervals = intervalsFromMask(identity.presentIntervalsMask);
+
+    intervals.sort((a, b) {
+      final roleA = identity.toneRolesByInterval[a];
+      final roleB = identity.toneRolesByInterval[b];
+
+      final rankA = roleA?.degreeFromRoot ?? _fallbackDegreeRank(a);
+      final rankB = roleB?.degreeFromRoot ?? _fallbackDegreeRank(b);
+      final primary = rankA.compareTo(rankB);
+      if (primary != 0) return primary;
+      return a.compareTo(b);
+    });
+
+    return List<int>.unmodifiable(intervals);
+  }
+
+  /// An example MIDI voicing for the chord in a playable register.
+  static List<int> normalizedVoicingForIdentity(ChordIdentity identity) {
+    final intervals = sortedIntervalsForIdentity(identity);
+    if (intervals.isEmpty) return const <int>[];
+
+    final rootMidi = 60 + identity.rootPc;
+    final bassInterval = identity.hasSlashBass
+        ? _normalizedInterval(identity.bassPc - identity.rootPc)
+        : 0;
+    final bassMidi = rootMidi + bassInterval;
+    final voicingIntervals = identity.hasSlashBass
+        ? _compactIntervalsAboveBass(
+            intervals: intervals,
+            bassInterval: bassInterval,
+          )
+        : _rootPositionStackIntervals(intervals, identity);
+    final notes = <int>[];
+
+    for (final interval in voicingIntervals) {
+      final offset = identity.hasSlashBass
+          ? _normalizedInterval(interval - bassInterval)
+          : _rootPositionStackOffset(interval, identity);
+      var midi = bassMidi + offset;
+      while (notes.isNotEmpty && midi <= notes.last) {
+        midi += 12;
+      }
+      notes.add(midi);
+    }
+
+    return List<int>.unmodifiable(notes);
+  }
+
+  static List<int> _compactIntervalsAboveBass({
+    required List<int> intervals,
+    required int bassInterval,
+  }) {
+    final out = intervals.toList()
+      ..sort((a, b) {
+        final offsetA = _normalizedInterval(a - bassInterval);
+        final offsetB = _normalizedInterval(b - bassInterval);
+        final primary = offsetA.compareTo(offsetB);
+        if (primary != 0) return primary;
+        return a.compareTo(b);
+      });
+
+    return out;
+  }
+
+  static List<int> _rootPositionStackIntervals(
+    List<int> intervals,
+    ChordIdentity identity,
+  ) {
+    final out = intervals.toList()
+      ..sort((a, b) {
+        final offsetA = _rootPositionStackOffset(a, identity);
+        final offsetB = _rootPositionStackOffset(b, identity);
+        final primary = offsetA.compareTo(offsetB);
+        if (primary != 0) return primary;
+        return a.compareTo(b);
+      });
+
+    return out;
+  }
+
+  static int _rootPositionStackOffset(int interval, ChordIdentity identity) {
+    final role = identity.toneRolesByInterval[interval];
+    return switch (role) {
+      ChordToneRole.flat9 ||
+      ChordToneRole.nine ||
+      ChordToneRole.sharp9 ||
+      ChordToneRole.add9 ||
+      ChordToneRole.addSharp9 ||
+      ChordToneRole.eleven ||
+      ChordToneRole.sharp11 ||
+      ChordToneRole.add11 ||
+      ChordToneRole.flat13 ||
+      ChordToneRole.thirteen ||
+      ChordToneRole.add13 => interval + 12,
+      _ => interval,
+    };
+  }
+
+  static int _fallbackDegreeRank(int interval) {
+    return switch (interval) {
+      0 => 1,
+      1 || 2 => 2,
+      3 || 4 => 3,
+      5 || 6 => 4,
+      7 || 8 => 5,
+      9 => 6,
+      10 || 11 => 7,
+      _ => 99,
+    };
+  }
+
+  static int _normalizedInterval(int value) {
+    final normalized = value % 12;
+    return normalized < 0 ? normalized + 12 : normalized;
+  }
+}
